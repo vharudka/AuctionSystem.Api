@@ -1,12 +1,13 @@
-﻿using AuctionSystem.Api.Dtos;
+﻿using AuctionSystem.Api.Domain.Entities;
+using AuctionSystem.Api.Dtos.Auctions;
 
 namespace AuctionSystem.Api.Services;
 
 public interface IAuctionService
 {
-    Task<IEnumerable<AuctionDto>> GetAllAsync();
-    Task<AuctionDto?> GetByIdAsync(int id);
-    Task<AuctionDto> CreateAsync(CreateAuctionDto dto);
-    Task<AuctionDto?> UpdateAsync(int id, UpdateAuctionDto dto);
-    Task<bool> DeleteAsync(int id);
+    Task<PagedResult<AuctionResponse>> GetAllAsync(AuctionQueryParameters query);
+    Task<AuctionResponse> GetByIdAsync(int id);
+    Task<AuctionResponse> CreateAsync(CreateAuctionRequest request);
+    Task<AuctionResponse> UpdateAsync(int id, UpdateAuctionRequest request);
+    Task DeleteAsync(int id);
 }

@@ -1,7 +1,7 @@
 ﻿using AuctionSystem.Api.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace AuctionSystem.Api.Infrastructure;
+namespace AuctionSystem.Api.Infrastructure.Repositories;
 
 public class AuctionDbContext : DbContext
 {

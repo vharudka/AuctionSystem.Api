@@ -1,9 +1,9 @@
 ﻿namespace AuctionSystem.Api.Dtos;
 
-public record UserQueryParameters(
+public abstract record BaseQueryParameters(
     string? Search,
     string? SortBy,
     bool Desc,
-    int Page = 1,
-    int PageSize = 10
+    int Page,
+    int PageSize
 );

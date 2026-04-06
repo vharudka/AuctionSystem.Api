@@ -1,8 +1,8 @@
 ﻿using AuctionSystem.Api.Domain.Entities;
-using AuctionSystem.Api.Dtos;
+using AuctionSystem.Api.Dtos.Users;
 using Microsoft.EntityFrameworkCore;
 
-namespace AuctionSystem.Api.Infrastructure;
+namespace AuctionSystem.Api.Infrastructure.Repositories;
 
 public class UserRepository : IUserRepository
 {
@@ -30,7 +30,6 @@ public class UserRepository : IUserRepository
                 u.Surname.Contains(query.Search));
         }
 
-        var totalCount = await users.CountAsync();
 
         users = query.SortBy?.ToLower() switch
         {
@@ -49,6 +48,7 @@ public class UserRepository : IUserRepository
             _ => users.OrderBy(u => u.Id)
         };
 
+        var totalCount = await users.CountAsync();
         var items = await users.Skip((query.Page - 1) * query.PageSize)
                                .Take(query.PageSize)
                                .ToListAsync();

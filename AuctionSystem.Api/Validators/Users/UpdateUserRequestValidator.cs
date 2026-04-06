@@ -1,7 +1,7 @@
-﻿using AuctionSystem.Api.Dtos;
+﻿using AuctionSystem.Api.Dtos.Users;
 using FluentValidation;
 
-namespace AuctionSystem.Api.Validators;
+namespace AuctionSystem.Api.Validators.Users;
 
 public class UpdateUserRequestValidator : AbstractValidator<UpdateUserRequest>
 {

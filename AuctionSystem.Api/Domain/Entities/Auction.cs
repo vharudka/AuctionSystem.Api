@@ -11,7 +11,7 @@ public class Auction : BaseEntity
     public decimal StartingPrice { get; set; }
     public decimal CurrentPrice { get; set; }
     public AuctionStatus Status { get; set; } = AuctionStatus.Draft;
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
 
     public int OwnerId { get; set; }

@@ -1,6 +1,6 @@
 ﻿using AuctionSystem.Api.Domain.Entities;
 
-namespace AuctionSystem.Api.Infrastructure;
+namespace AuctionSystem.Api.Infrastructure.Repositories;
 
 public interface IBidRepository
 {

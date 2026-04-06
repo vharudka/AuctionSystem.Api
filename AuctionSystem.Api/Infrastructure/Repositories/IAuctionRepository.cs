@@ -1,13 +1,15 @@
 ﻿using AuctionSystem.Api.Domain.Entities;
+using AuctionSystem.Api.Dtos.Auctions;
 
-namespace AuctionSystem.Api.Infrastructure;
+namespace AuctionSystem.Api.Infrastructure.Repositories;
 
 public interface IAuctionRepository
 {
     Task<Auction?> GetByIdAsync(int id);
-    Task<IEnumerable<Auction>> GetAllAsync();
+    Task<PagedResult<Auction>> GetAllAsync(AuctionQueryParameters query);
     Task AddAsync(Auction auction);
     Task UpdateAsync(Auction auction);
+    Task UpdateStatusesAsync();
     Task DeleteAsync(Auction auction);
     Task SaveChangesAsync();
 }

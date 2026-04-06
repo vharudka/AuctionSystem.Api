@@ -1,7 +1,7 @@
 ﻿using AuctionSystem.Api.Domain.Entities;
-using AuctionSystem.Api.Dtos;
+using AuctionSystem.Api.Dtos.Users;
 
-namespace AuctionSystem.Api.Infrastructure;
+namespace AuctionSystem.Api.Infrastructure.Repositories;
 public interface IUserRepository
 {
     Task<User?> GetByIdAsync(int id);

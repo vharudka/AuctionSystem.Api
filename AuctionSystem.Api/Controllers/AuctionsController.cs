@@ -1,47 +1,77 @@
-﻿using AuctionSystem.Api.Dtos;
+﻿using AuctionSystem.Api.Dtos.Auctions;
 using AuctionSystem.Api.Services;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AuctionSystem.Api.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("auctions")]
 public class AuctionsController : ControllerBase
 {
     private readonly IAuctionService _service;
+    private readonly IValidator<CreateAuctionRequest> _createValidator;
+    private readonly IValidator<UpdateAuctionRequest> _updateValidator;
 
-    public AuctionsController(IAuctionService service)
+    public AuctionsController(
+        IAuctionService service,
+        IValidator<CreateAuctionRequest> createValidator,
+        IValidator<UpdateAuctionRequest> updateValidator)
     {
         _service = service;
-    }
-
-    [HttpGet]
-    public IActionResult GetAll()
-    {
-        return Ok();
-    }
-
-    [HttpGet("{id:int}")]
-    public IActionResult Get(int id)
-    {
-        return Ok();
+        _createValidator = createValidator;
+        _updateValidator = updateValidator;
     }
 
     [HttpPost]
-    public IActionResult Create(CreateAuctionDto dto)
+    public async Task<IActionResult> Create(CreateAuctionRequest request)
     {
-        return Ok();
+        var validation = await _createValidator.ValidateAsync(request);
+        if (!validation.IsValid)
+        {
+            return BadRequest(validation.Errors);
+        }
+
+        var result = await _service.CreateAsync(request);
+
+        return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }
 
-    [HttpPut("{id:int}")]
-    public IActionResult Update(int id, UpdateAuctionDto dto)
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(int id, UpdateAuctionRequest request)
     {
-        return Ok();
+        var validation = await _updateValidator.ValidateAsync(request);
+        if (!validation.IsValid)
+        {
+            return BadRequest(validation.Errors);
+        }
+
+        var result = await _service.UpdateAsync(id, request);
+
+        return Ok(result);
     }
 
-    [HttpDelete("{id:int}")]
-    public IActionResult Delete(int id)
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(int id)
     {
-        return Ok();
+        await _service.DeleteAsync(id);
+
+        return NoContent();
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(int id)
+    {
+        var result = await _service.GetByIdAsync(id);
+
+        return Ok(result);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAll([FromQuery] AuctionQueryParameters query)
+    {
+        var result = await _service.GetAllAsync(query);
+
+        return Ok(result);
     }
 }

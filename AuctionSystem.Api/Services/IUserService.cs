@@ -1,5 +1,5 @@
 ﻿using AuctionSystem.Api.Domain.Entities;
-using AuctionSystem.Api.Dtos;
+using AuctionSystem.Api.Dtos.Users;
 
 namespace AuctionSystem.Api.Services;
 
@@ -9,5 +9,5 @@ public interface IUserService
     Task<UserResponse?> GetByIdAsync(int id);
     Task<UserResponse> CreateAsync(CreateUserRequest request);
     Task<UserResponse?> UpdateAsync(int id, UpdateUserRequest request);
-    Task<bool> DeleteAsync(int id);
+    Task DeleteAsync(int id);
 }

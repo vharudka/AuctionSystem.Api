@@ -1,19 +1,13 @@
-﻿using AuctionSystem.Api.Dtos;
+﻿using AuctionSystem.Api.Dtos.Users;
 using FluentValidation;
 
-namespace AuctionSystem.Api.Validators;
+namespace AuctionSystem.Api.Validators.Users;
 
 public class UserQueryParametersValidator : AbstractValidator<UserQueryParameters>
 {
     public UserQueryParametersValidator()
     {
-        RuleFor(x => x.Page)
-            .GreaterThan(0)
-            .WithMessage("Page must be greater than 0.");
-
-        RuleFor(x => x.PageSize)
-            .InclusiveBetween(1, 100)
-            .WithMessage("PageSize must be between 1 and 100.");
+        Include(new BaseQueryParametersValidator());
 
         RuleFor(x => x.SortBy)
             .Must(s => string.IsNullOrEmpty(s) ||

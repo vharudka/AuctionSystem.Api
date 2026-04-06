@@ -1,39 +1,131 @@
-﻿using AuctionSystem.Api.Dtos;
-using AuctionSystem.Api.Infrastructure;
+﻿using AuctionSystem.Api.Domain.Entities;
+using AuctionSystem.Api.Domain.Enums;
+using AuctionSystem.Api.Domain.Exceptions;
+using AuctionSystem.Api.Dtos.Auctions;
+using AuctionSystem.Api.Infrastructure.Repositories;
 
 namespace AuctionSystem.Api.Services;
 
 public class AuctionService : IAuctionService
 {
-    private readonly IAuctionRepository _repository;
+    private readonly IAuctionRepository _auctionRepository;
+    private readonly IUserRepository _userRepository;
 
-    public AuctionService(IAuctionRepository repository)
+    public AuctionService(IAuctionRepository auctionRepository, IUserRepository userRepository)
     {
-        _repository = repository;
+        _auctionRepository = auctionRepository;
+        _userRepository = userRepository;
     }
 
-    public Task<IEnumerable<AuctionDto>> GetAllAsync()
+    public async Task<AuctionResponse> CreateAsync(CreateAuctionRequest request)
     {
-        return Task.FromResult<IEnumerable<AuctionDto>>(new List<AuctionDto>());
+        var seller = await _userRepository.GetByIdAsync(request.OwnerId);
+        if (seller == null)
+        {
+            throw new UserNotFoundException(request.OwnerId);
+        }
+
+        var auction = new Auction
+        {
+            Title = request.Title,
+            Description = request.Description,
+            StartingPrice = request.StartingPrice,
+            CurrentPrice = request.StartingPrice,
+            StartDate = request.StartDate,
+            EndDate = request.EndDate,
+            Category = request.Category,
+            OwnerId = request.OwnerId,
+            Status = AuctionStatus.Draft
+        };
+
+        await _auctionRepository.AddAsync(auction);
+        await _auctionRepository.SaveChangesAsync();
+
+        return Map(auction);
     }
 
-    public Task<AuctionDto?> GetByIdAsync(int id)
+    public async Task<AuctionResponse> UpdateAsync(int id, UpdateAuctionRequest request)
     {
-        return Task.FromResult<AuctionDto?>(null);
+        var auction = await _auctionRepository.GetByIdAsync(id);
+        if (auction == null)
+        {
+            throw new AuctionNotFoundException(id);
+        }
+
+        auction.Title = request.Title;
+        auction.Description = request.Description;
+        auction.Category = request.Category;
+        auction.StartingPrice = request.StartingPrice;
+        auction.StartDate = request.StartDate;
+        auction.EndDate = request.EndDate;
+
+        await _auctionRepository.UpdateAsync(auction);
+        await _auctionRepository.SaveChangesAsync();
+
+        return Map(auction);
     }
 
-    public Task<AuctionDto> CreateAsync(CreateAuctionDto dto)
+    public async Task DeleteAsync(int id)
     {
-        return Task.FromResult(new AuctionDto());
+        var auction = await _auctionRepository.GetByIdAsync(id);
+        if (auction == null)
+        {
+            throw new AuctionNotFoundException(id);
+        }
+
+        await _auctionRepository.DeleteAsync(auction);
+        await _auctionRepository.SaveChangesAsync();
     }
 
-    public Task<AuctionDto?> UpdateAsync(int id, UpdateAuctionDto dto)
+    public async Task<AuctionResponse> GetByIdAsync(int id)
     {
-        return Task.FromResult<AuctionDto?>(null);
+        var auction = await _auctionRepository.GetByIdAsync(id);
+        if (auction == null)
+        {
+            throw new AuctionNotFoundException(id);
+        }
+
+        return Map(auction);
     }
 
-    public Task<bool> DeleteAsync(int id)
+    public async Task<PagedResult<AuctionResponse>> GetAllAsync(AuctionQueryParameters query)
     {
-        return Task.FromResult(false);
+        var result = await _auctionRepository.GetAllAsync(query);
+
+        return new PagedResult<AuctionResponse>(
+            result.Items.Select(Map),
+            result.Page,
+            result.PageSize,
+            result.TotalCount
+        );
     }
+
+    public async Task<AuctionResponse> UpdateStatusAsync(int id, AuctionStatus status)
+    {
+        var auction = await _auctionRepository.GetByIdAsync(id);
+        if (auction == null)
+        {
+            throw new AuctionNotFoundException(id);
+        }
+
+        auction.Status = status;
+
+        await _auctionRepository.SaveChangesAsync();
+
+        return Map(auction);
+    }
+
+    private static AuctionResponse Map(Auction a)
+        => new AuctionResponse(
+            a.Id,
+            a.Title,
+            a.Description,
+            a.Category,
+            a.StartingPrice,
+            a.CurrentPrice,
+            a.StartDate,
+            a.EndDate,
+            a.Status,
+            a.OwnerId
+        );
 }

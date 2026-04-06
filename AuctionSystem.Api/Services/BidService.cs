@@ -1,5 +1,5 @@
 ﻿using AuctionSystem.Api.Dtos;
-using AuctionSystem.Api.Infrastructure;
+using AuctionSystem.Api.Infrastructure.Repositories;
 
 namespace AuctionSystem.Api.Services;
 

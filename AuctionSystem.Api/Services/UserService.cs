@@ -1,7 +1,7 @@
 ﻿using AuctionSystem.Api.Domain.Entities;
 using AuctionSystem.Api.Domain.Exceptions;
-using AuctionSystem.Api.Dtos;
-using AuctionSystem.Api.Infrastructure;
+using AuctionSystem.Api.Dtos.Users;
+using AuctionSystem.Api.Infrastructure.Repositories;
 
 namespace AuctionSystem.Api.Services;
 
@@ -81,17 +81,15 @@ public class UserService : IUserService
         return new UserResponse(user.Id, user.Username, user.Name, user.Surname);
     }
 
-    public async Task<bool> DeleteAsync(int id)
+    public async Task DeleteAsync(int id)
     {
         var user = await _repository.GetByIdAsync(id);
         if (user == null)
         {
-            return false;
+            return;
         }
 
         await _repository.DeleteAsync(user);
         await _repository.SaveChangesAsync();
-
-        return true;
     }
 }

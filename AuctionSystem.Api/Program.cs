@@ -1,6 +1,6 @@
-using AuctionSystem.Api.Infrastructure;
+using AuctionSystem.Api.Infrastructure.Repositories;
 using AuctionSystem.Api.Services;
-using AuctionSystem.Api.Validators;
+using AuctionSystem.Api.Validators.Users;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
