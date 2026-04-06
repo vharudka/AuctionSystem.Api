@@ -21,8 +21,6 @@ public class ExceptionHandlingMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unhandled exception");
-
             context.Response.ContentType = "application/json";
 
             switch (ex)
@@ -32,10 +30,16 @@ public class ExceptionHandlingMiddleware
                     break;
 
                 case UserNotFoundException:
+                case AuctionNotFoundException:
                     context.Response.StatusCode = StatusCodes.Status404NotFound;
                     break;
 
+                case BidTooLowException:
+                    context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                    break;
+
                 default:
+                    _logger.LogError(ex, "Unhandled exception");
                     context.Response.StatusCode = StatusCodes.Status500InternalServerError;
                     break;
             }

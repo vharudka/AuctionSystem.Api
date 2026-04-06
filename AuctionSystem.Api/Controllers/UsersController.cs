@@ -1,6 +1,5 @@
 ﻿using AuctionSystem.Api.Dtos.Users;
 using AuctionSystem.Api.Services;
-using Azure.Core;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
@@ -27,12 +26,11 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll(
-        [FromQuery] string? search,
-        [FromQuery] string? sortBy,
-        [FromQuery] bool desc = false,
-        [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 10)
+    public async Task<IActionResult> GetAllAsync([FromQuery] string? search,
+                                                 [FromQuery] string? sortBy,
+                                                 [FromQuery] bool desc = false,
+                                                 [FromQuery] int page = 1,
+                                                 [FromQuery] int pageSize = 10)
     {
         var query = new UserQueryParameters(search, sortBy, desc, page, pageSize);
 
@@ -47,7 +45,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int id)
+    public async Task<IActionResult> GetByIdAsync(int id)
     {
         var result = await _service.GetByIdAsync(id);
 
@@ -55,7 +53,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(CreateUserRequest request)
+    public async Task<IActionResult> CreateAsync(CreateUserRequest request)
     {
         var validation = await _createValidator.ValidateAsync(request);
 
@@ -65,11 +63,11 @@ public class UsersController : ControllerBase
         }
 
         var result = await _service.CreateAsync(request);
-        return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+        return CreatedAtAction(nameof(GetByIdAsync), new { id = result.Id }, result);
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, UpdateUserRequest request)
+    public async Task<IActionResult> UpdateAsync(int id, UpdateUserRequest request)
     {
         var validation = await _updateValidator.ValidateAsync(request);
 
@@ -83,7 +81,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
+    public async Task<IActionResult> DeleteAsync(int id)
     {
         await _service.DeleteAsync(id);
 

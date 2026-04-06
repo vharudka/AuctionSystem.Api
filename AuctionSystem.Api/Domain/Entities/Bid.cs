@@ -1,6 +1,6 @@
 ﻿namespace AuctionSystem.Api.Domain.Entities;
 
-public class Bid : BaseEntity
+public class Bid : Base
 {
     public decimal Amount { get; set; }
     public DateTime PlacedAt { get; set; }

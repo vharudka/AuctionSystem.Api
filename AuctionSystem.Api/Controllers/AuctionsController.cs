@@ -13,10 +13,9 @@ public class AuctionsController : ControllerBase
     private readonly IValidator<CreateAuctionRequest> _createValidator;
     private readonly IValidator<UpdateAuctionRequest> _updateValidator;
 
-    public AuctionsController(
-        IAuctionService service,
-        IValidator<CreateAuctionRequest> createValidator,
-        IValidator<UpdateAuctionRequest> updateValidator)
+    public AuctionsController(IAuctionService service,
+                              IValidator<CreateAuctionRequest> createValidator,
+                              IValidator<UpdateAuctionRequest> updateValidator)
     {
         _service = service;
         _createValidator = createValidator;
@@ -24,7 +23,7 @@ public class AuctionsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(CreateAuctionRequest request)
+    public async Task<IActionResult> CreateAsync(CreateAuctionRequest request)
     {
         var validation = await _createValidator.ValidateAsync(request);
         if (!validation.IsValid)
@@ -38,7 +37,7 @@ public class AuctionsController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, UpdateAuctionRequest request)
+    public async Task<IActionResult> UpdateAsync(int id, UpdateAuctionRequest request)
     {
         var validation = await _updateValidator.ValidateAsync(request);
         if (!validation.IsValid)
@@ -52,7 +51,7 @@ public class AuctionsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
+    public async Task<IActionResult> DeleteAsync(int id)
     {
         await _service.DeleteAsync(id);
 
@@ -60,7 +59,7 @@ public class AuctionsController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int id)
+    public async Task<IActionResult> GetByIdAsync(int id)
     {
         var result = await _service.GetByIdAsync(id);
 
@@ -68,7 +67,7 @@ public class AuctionsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll([FromQuery] AuctionQueryParameters query)
+    public async Task<IActionResult> GetAllAsync([FromQuery] AuctionQueryParameters query)
     {
         var result = await _service.GetAllAsync(query);
 

@@ -3,7 +3,7 @@
 namespace AuctionSystem.Api.Domain.Entities;
 
 #nullable disable
-public class Auction : BaseEntity
+public class Auction : Base
 {
     public string Title { get; set; }
     public string Description { get; set; }
