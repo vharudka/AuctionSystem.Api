@@ -1,4 +1,6 @@
-﻿namespace AuctionSystem.Api.Domain.Entities;
+﻿using AuctionSystem.Api.Domain.Enums;
+
+namespace AuctionSystem.Api.Domain.Entities;
 
 #nullable disable
 public class Auction : BaseEntity
@@ -8,8 +10,12 @@ public class Auction : BaseEntity
     public string Category { get; set; }
     public decimal StartingPrice { get; set; }
     public decimal CurrentPrice { get; set; }
+    public AuctionStatus Status { get; set; } = AuctionStatus.Draft;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime EndDate { get; set; }
 
     public int OwnerId { get; set; }
     public User? Owner { get; set; }
+
+    public ICollection<Bid> Bids { get; set; }
 }
