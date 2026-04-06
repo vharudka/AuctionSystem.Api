@@ -1,5 +1,7 @@
 using AuctionSystem.Api.Infrastructure;
 using AuctionSystem.Api.Services;
+using AuctionSystem.Api.Validators;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +14,10 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddDbContext<AuctionDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
+
+builder.Services.AddValidatorsFromAssemblyContaining<CreateUserRequestValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<UpdateUserRequestValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<UserQueryParametersValidator>();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuctionRepository, AuctionRepository>();

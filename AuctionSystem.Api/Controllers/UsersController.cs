@@ -1,5 +1,7 @@
 ﻿using AuctionSystem.Api.Dtos;
 using AuctionSystem.Api.Services;
+using Azure.Core;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AuctionSystem.Api.Controllers;
@@ -9,36 +11,82 @@ namespace AuctionSystem.Api.Controllers;
 public class UsersController : ControllerBase
 {
     private readonly IUserService _service;
+    private readonly IValidator<CreateUserRequest> _createValidator;
+    private readonly IValidator<UpdateUserRequest> _updateValidator;
+    private readonly IValidator<UserQueryParameters> _queryValidator;
 
-    public UsersController(IUserService service) => _service = service;
-
-    [HttpGet]
-    public IActionResult GetAll()
+    public UsersController(IUserService service,
+                           IValidator<CreateUserRequest> createValidator,
+                           IValidator<UpdateUserRequest> updateValidator,
+                           IValidator<UserQueryParameters> queryValidator)
     {
-        return Ok();
+        _service = service;
+        _createValidator = createValidator;
+        _updateValidator = updateValidator;
+        _queryValidator = queryValidator;
     }
 
-    [HttpGet("{id:int}")]
-    public IActionResult Get(int id)
+    [HttpGet]
+    public async Task<IActionResult> GetAll(
+        [FromQuery] string? search,
+        [FromQuery] string? sortBy,
+        [FromQuery] bool desc = false,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
-        return Ok();
+        var query = new UserQueryParameters(search, sortBy, desc, page, pageSize);
+
+        var validation = await _queryValidator.ValidateAsync(query);
+        if (!validation.IsValid)
+        {
+            return BadRequest(validation.Errors);
+        }
+
+        var result = await _service.GetAllAsync(query);
+        return Ok(result);
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(int id)
+    {
+        var result = await _service.GetByIdAsync(id);
+
+        return result == null ? NotFound() : Ok(result);
     }
 
     [HttpPost]
-    public IActionResult Create(CreateUserDto dto)
+    public async Task<IActionResult> Create(CreateUserRequest request)
     {
-        return Ok();
+        var validation = await _createValidator.ValidateAsync(request);
+
+        if (!validation.IsValid)
+        {
+            return BadRequest(validation.Errors);
+        }
+
+        var result = await _service.CreateAsync(request);
+        return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }
 
-    [HttpPut("{id:int}")]
-    public IActionResult Update(int id, UpdateUserDto dto)
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(int id, UpdateUserRequest request)
     {
-        return Ok();
+        var validation = await _updateValidator.ValidateAsync(request);
+
+        if (!validation.IsValid)
+        {
+            return BadRequest(validation.Errors);
+        }
+
+        var result = await _service.UpdateAsync(id, request);
+        return result == null ? NotFound() : Ok(result);
     }
 
-    [HttpDelete("{id:int}")]
-    public IActionResult Delete(int id)
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(int id)
     {
-        return Ok();
+        var deleted = await _service.DeleteAsync(id);
+
+        return deleted ? NoContent() : NotFound();
     }
 }

@@ -4,7 +4,8 @@
 public class User : BaseEntity
 {
     public string Username { get; set; }
-    public string Email { get; set; }
+    public string Name { get; set; }
+    public string Surname { get; set; }
 
     public ICollection<Auction> Auctions { get; set; }
     public ICollection<Bid> Bids { get; set; }

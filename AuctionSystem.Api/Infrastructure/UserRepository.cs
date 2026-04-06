@@ -1,23 +1,69 @@
 ﻿using AuctionSystem.Api.Domain.Entities;
+using AuctionSystem.Api.Dtos;
+using Microsoft.EntityFrameworkCore;
 
 namespace AuctionSystem.Api.Infrastructure;
 
 public class UserRepository : IUserRepository
 {
     private readonly AuctionDbContext _db;
+
     public UserRepository(AuctionDbContext db)
     {
         _db = db;
     }
 
-    public Task<User?> GetByIdAsync(int id)
+    public async Task<User?> GetByIdAsync(int id)
     {
-        return _db.Users.FindAsync(id).AsTask();
+        return await _db.Users.FindAsync(id);
     }
 
-    public Task<IEnumerable<User>> GetAllAsync()
+    public async Task<PagedResult<User>> GetAllAsync(UserQueryParameters query)
     {
-        return Task.FromResult<IEnumerable<User>>(_db.Users.ToList());
+        var users = _db.Users.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(query.Search))
+        {
+            users = users.Where(u =>
+                u.Username.Contains(query.Search) ||
+                u.Name.Contains(query.Search) ||
+                u.Surname.Contains(query.Search));
+        }
+
+        var totalCount = await users.CountAsync();
+
+        users = query.SortBy?.ToLower() switch
+        {
+            "username" => query.Desc
+                ? users.OrderByDescending(u => u.Username)
+                : users.OrderBy(u => u.Username),
+
+            "name" => query.Desc
+                ? users.OrderByDescending(u => u.Name)
+                : users.OrderBy(u => u.Name),
+
+            "surname" => query.Desc
+                ? users.OrderByDescending(u => u.Surname)
+                : users.OrderBy(u => u.Surname),
+
+            _ => users.OrderBy(u => u.Id)
+        };
+
+        var items = await users.Skip((query.Page - 1) * query.PageSize)
+                               .Take(query.PageSize)
+                               .ToListAsync();
+
+        return new PagedResult<User>(
+            items,
+            query.Page,
+            query.PageSize,
+            totalCount
+        );
+    }
+
+    public async Task<User?> GetByUsernameAsync(string username)
+    {
+        return await _db.Users.FirstOrDefaultAsync(u => u.Username == username);
     }
 
     public Task AddAsync(User user)
