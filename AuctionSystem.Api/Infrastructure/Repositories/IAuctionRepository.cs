@@ -9,7 +9,6 @@ public interface IAuctionRepository
     Task<PagedResult<Auction>> GetAllAsync(AuctionQueryParameters query);
     Task AddAsync(Auction auction);
     Task UpdateAsync(Auction auction);
-    Task UpdateStatusesAsync();
     Task DeleteAsync(Auction auction);
     Task SaveChangesAsync();
 }

@@ -33,7 +33,7 @@ public class AuctionsController : ControllerBase
 
         var result = await _service.CreateAsync(request);
 
-        return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+        return CreatedAtAction(nameof(GetByIdAsync), new { id = result.Id }, result);
     }
 
     [HttpPut("{id}")]

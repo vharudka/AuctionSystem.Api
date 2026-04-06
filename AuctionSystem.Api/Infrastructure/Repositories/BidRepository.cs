@@ -24,7 +24,7 @@ public class BidRepository : IBidRepository
                 ? bids.OrderByDescending(b => b.Amount)
                 : bids.OrderBy(b => b.Amount),
 
-            "createdat" => query.Desc
+            "placedat" => query.Desc
                 ? bids.OrderByDescending(b => b.PlacedAt)
                 : bids.OrderBy(b => b.PlacedAt),
 

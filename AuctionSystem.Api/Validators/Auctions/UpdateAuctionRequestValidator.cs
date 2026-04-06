@@ -35,38 +35,5 @@ public class UpdateAuctionRequestValidator : AbstractValidator<UpdateAuctionRequ
         RuleFor(x => x.Category)
             .NotEmpty()
             .WithMessage("Category is required.");
-
-        RuleFor(x => x.Status)
-            .IsInEnum()
-            .WithMessage("Invalid auction status.");
-
-        RuleFor(x => x)
-            .Custom((model, context) =>
-            {
-                var expected = CalculateExpectedStatus(model.StartDate, model.EndDate);
-
-                if (model.Status != expected)
-                {
-                    context.AddFailure("Status",
-                        $"Invalid status. Based on dates, expected '{expected}' but got '{model.Status}'.");
-                }
-            });
-    }
-
-    private AuctionStatus CalculateExpectedStatus(DateTime start, DateTime end)
-    {
-        var now = DateTime.UtcNow;
-
-        if (start > now)
-        {
-            return AuctionStatus.Draft;
-        }
-
-        if (end <= now)
-        {
-            return AuctionStatus.Finished;
-        }
-
-        return AuctionStatus.Active;
     }
 }

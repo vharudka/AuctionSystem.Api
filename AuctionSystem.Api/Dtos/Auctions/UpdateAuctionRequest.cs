@@ -1,6 +1,4 @@
-﻿using AuctionSystem.Api.Domain.Enums;
-
-namespace AuctionSystem.Api.Dtos.Auctions;
+﻿namespace AuctionSystem.Api.Dtos.Auctions;
 
 public record UpdateAuctionRequest(
     string Title,
@@ -8,6 +6,5 @@ public record UpdateAuctionRequest(
     string Category,
     decimal StartingPrice,
     DateTime StartDate,
-    DateTime EndDate,
-    AuctionStatus Status
+    DateTime EndDate
 );

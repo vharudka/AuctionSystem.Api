@@ -35,6 +35,8 @@ public class ExceptionHandlingMiddleware
                     break;
 
                 case BidTooLowException:
+                case AuctionNotActiveException:
+                case AuctionExpiredException:
                     context.Response.StatusCode = StatusCodes.Status400BadRequest;
                     break;
 

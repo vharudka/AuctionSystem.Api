@@ -2,6 +2,7 @@
 using AuctionSystem.Api.Domain.Enums;
 using AuctionSystem.Api.Domain.Exceptions;
 using AuctionSystem.Api.Dtos.Bids;
+using AuctionSystem.Api.Helpers;
 using AuctionSystem.Api.Infrastructure.Repositories;
 
 namespace AuctionSystem.Api.Services;
@@ -59,7 +60,14 @@ public class BidService : IBidService
             throw new UserNotFoundException(request.UserId);
         }
 
-        if (auction.Status != AuctionStatus.Active)
+        var status = AuctionStatusCalculator.GetStatus(auction.StartDate, auction.EndDate);
+
+        if (status == AuctionStatus.Draft)
+        {
+            throw new AuctionNotActiveException();
+        }
+
+        if (status == AuctionStatus.Finished)
         {
             throw new AuctionExpiredException();
         }

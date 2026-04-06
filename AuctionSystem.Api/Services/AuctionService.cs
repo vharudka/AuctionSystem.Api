@@ -2,6 +2,7 @@
 using AuctionSystem.Api.Domain.Enums;
 using AuctionSystem.Api.Domain.Exceptions;
 using AuctionSystem.Api.Dtos.Auctions;
+using AuctionSystem.Api.Helpers;
 using AuctionSystem.Api.Infrastructure.Repositories;
 
 namespace AuctionSystem.Api.Services;
@@ -34,8 +35,7 @@ public class AuctionService : IAuctionService
             StartDate = request.StartDate,
             EndDate = request.EndDate,
             Category = request.Category,
-            OwnerId = request.OwnerId,
-            Status = AuctionStatus.Draft
+            OwnerId = request.OwnerId
         };
 
         await _auctionRepository.AddAsync(auction);
@@ -100,21 +100,6 @@ public class AuctionService : IAuctionService
         );
     }
 
-    public async Task<AuctionResponse> UpdateStatusAsync(int id, AuctionStatus status)
-    {
-        var auction = await _auctionRepository.GetByIdAsync(id);
-        if (auction == null)
-        {
-            throw new AuctionNotFoundException(id);
-        }
-
-        auction.Status = status;
-
-        await _auctionRepository.SaveChangesAsync();
-
-        return Map(auction);
-    }
-
     private static AuctionResponse Map(Auction a)
         => new AuctionResponse(
             a.Id,
@@ -125,7 +110,7 @@ public class AuctionService : IAuctionService
             a.CurrentPrice,
             a.StartDate,
             a.EndDate,
-            a.Status,
+            AuctionStatusCalculator.GetStatus(a.StartDate, a.EndDate),
             a.OwnerId
         );
 }

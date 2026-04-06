@@ -27,9 +27,23 @@ public class AuctionRepository : IAuctionRepository
             auctions = auctions.Where(a => a.Category == query.Category);
         }
 
+        var now = DateTime.UtcNow;
+
         if (query.Status.HasValue)
         {
-            auctions = auctions.Where(a => a.Status == query.Status.Value);
+            auctions = query.Status.Value switch
+            {
+                AuctionStatus.Draft =>
+                    auctions.Where(a => a.StartDate > now),
+
+                AuctionStatus.Active =>
+                    auctions.Where(a => a.StartDate <= now && a.EndDate > now),
+
+                AuctionStatus.Finished =>
+                    auctions.Where(a => a.EndDate <= now),
+
+                _ => auctions
+            };
         }
 
         if (!string.IsNullOrWhiteSpace(query.Search))
@@ -42,10 +56,22 @@ public class AuctionRepository : IAuctionRepository
 
         auctions = query.SortBy?.ToLower() switch
         {
-            "title" => query.Desc ? auctions.OrderByDescending(a => a.Title) : auctions.OrderBy(a => a.Title),
-            "startdate" => query.Desc ? auctions.OrderByDescending(a => a.StartDate) : auctions.OrderBy(a => a.StartDate),
-            "enddate" => query.Desc ? auctions.OrderByDescending(a => a.EndDate) : auctions.OrderBy(a => a.EndDate),
-            "currentprice" => query.Desc ? auctions.OrderByDescending(a => a.CurrentPrice) : auctions.OrderBy(a => a.CurrentPrice),
+            "title" => query.Desc
+                ? auctions.OrderByDescending(a => a.Title)
+                : auctions.OrderBy(a => a.Title),
+
+            "startdate" => query.Desc
+                ? auctions.OrderByDescending(a => a.StartDate)
+                : auctions.OrderBy(a => a.StartDate),
+
+            "enddate" => query.Desc
+                ? auctions.OrderByDescending(a => a.EndDate)
+                : auctions.OrderBy(a => a.EndDate),
+
+            "currentprice" => query.Desc
+                ? auctions.OrderByDescending(a => a.CurrentPrice)
+                : auctions.OrderBy(a => a.CurrentPrice),
+
             _ => auctions.OrderBy(a => a.Id)
         };
 
@@ -72,29 +98,6 @@ public class AuctionRepository : IAuctionRepository
         _db.Auctions.Update(auction);
 
         return Task.CompletedTask; 
-    }
-
-    public async Task UpdateStatusesAsync()
-    {
-        var now = DateTime.UtcNow;
-
-        var auctions = await _db.Auctions.ToListAsync();
-
-        foreach (var a in auctions)
-        {
-            if (now < a.StartDate)
-            {
-                a.Status = AuctionStatus.Draft;
-            }
-            else if (now >= a.StartDate && now < a.EndDate)
-            {
-                a.Status = AuctionStatus.Active;
-            }
-            else
-            {
-                a.Status = AuctionStatus.Finished;
-            }
-        }
     }
 
     public Task DeleteAsync(Auction auction)
