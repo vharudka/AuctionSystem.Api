@@ -3,6 +3,7 @@ using AuctionSystem.Api.Services;
 using AuctionSystem.Api.Validators;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,12 +28,19 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuctionService, AuctionService>();
 builder.Services.AddScoped<IBidService, BidService>();
 
+builder.Services.AddEndpointsApiExplorer();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference(options =>
+    {
+        // Force Scalar to look at the exact native .NET 10 path
+        options.WithOpenApiRoutePattern("/openapi/v1.json");
+    });
 }
 
 app.UseHttpsRedirection();
