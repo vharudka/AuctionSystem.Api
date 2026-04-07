@@ -1,12 +1,15 @@
 ﻿using AuctionSystem.Api.Dtos.Bids;
+using AuctionSystem.Api.Extensions;
 using AuctionSystem.Api.Services;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AuctionSystem.Api.Controllers;
 
 [ApiController]
 [Route("api/auctions/{auctionId:int}/[controller]")]
+[Authorize]
 public class BidsController : ControllerBase
 {
     private readonly IBidService _service;
@@ -27,7 +30,9 @@ public class BidsController : ControllerBase
     {
         var validation = await _queryValidator.ValidateAsync(query);
         if (!validation.IsValid)
+        {
             return BadRequest(validation.Errors);
+        }
 
         var result = await _service.GetBidsAsync(auctionId, query);
         return Ok(result);
@@ -42,8 +47,10 @@ public class BidsController : ControllerBase
             return BadRequest(validation.Errors);
         }
 
-        var result = await _service.CreateAsync(auctionId, request);
+        var userId = User.GetUserId();
 
-        return Ok(result);
+        var result = await _service.CreateAsync(auctionId, userId, request);
+
+        return Created($"/api/auctions/{auctionId}/bids/{result.Id}", result);
     }
 }

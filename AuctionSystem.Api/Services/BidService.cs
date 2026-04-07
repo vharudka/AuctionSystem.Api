@@ -46,7 +46,7 @@ public class BidService : IBidService
     }
 
 
-    public async Task<BidResponse> CreateAsync(int auctionId, CreateBidRequest request)
+    public async Task<BidResponse> CreateAsync(int auctionId, int userId, CreateBidRequest request)
     {
         var auction = await _auctionRepository.GetByIdAsync(auctionId);
         if (auction == null)
@@ -54,10 +54,10 @@ public class BidService : IBidService
             throw new AuctionNotFoundException(auctionId);
         }
 
-        var user = await _userRepository.GetByIdAsync(request.UserId);
+        var user = await _userRepository.GetByIdAsync(userId);
         if (user == null)
         {
-            throw new UserNotFoundException(request.UserId);
+            throw new UserNotFoundException(userId);
         }
 
         var status = AuctionStatusCalculator.GetStatus(auction.StartDate, auction.EndDate);
@@ -80,7 +80,7 @@ public class BidService : IBidService
         var bid = new Bid
         {
             AuctionId = auctionId,
-            UserId = request.UserId,
+            UserId = userId,
             Amount = request.Amount,
             PlacedAt = DateTime.UtcNow
         };

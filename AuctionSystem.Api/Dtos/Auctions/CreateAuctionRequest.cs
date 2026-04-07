@@ -6,6 +6,5 @@ public record CreateAuctionRequest(
     decimal StartingPrice,
     DateTime StartDate,
     DateTime EndDate,
-    string Category,
-    int OwnerId
+    string Category
 );

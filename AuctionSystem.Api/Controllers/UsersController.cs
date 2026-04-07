@@ -1,12 +1,14 @@
 ﻿using AuctionSystem.Api.Dtos.Users;
 using AuctionSystem.Api.Services;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AuctionSystem.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class UsersController : ControllerBase
 {
     private readonly IUserService _service;
@@ -52,6 +54,7 @@ public class UsersController : ControllerBase
         return result == null ? NotFound() : Ok(result);
     }
 
+    [AllowAnonymous]
     [HttpPost]
     public async Task<IActionResult> CreateAsync(CreateUserRequest request)
     {
@@ -63,7 +66,7 @@ public class UsersController : ControllerBase
         }
 
         var result = await _service.CreateAsync(request);
-        return CreatedAtAction(nameof(GetByIdAsync), new { id = result.Id }, result);
+        return Created("/api/users/me", result);
     }
 
     [HttpPut("{id}")]

@@ -34,9 +34,5 @@ public class CreateAuctionRequestValidator : AbstractValidator<CreateAuctionRequ
         RuleFor(x => x.EndDate)
             .GreaterThan(x => x.StartDate)
             .WithMessage("End date must be later than start date.");
-
-        RuleFor(x => x.OwnerId)
-            .GreaterThan(0)
-            .WithMessage("OwnerId must be a positive number.");
     }
 }

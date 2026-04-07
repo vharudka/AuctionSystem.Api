@@ -18,12 +18,12 @@ public class AuctionService : IAuctionService
         _userRepository = userRepository;
     }
 
-    public async Task<AuctionResponse> CreateAsync(CreateAuctionRequest request)
+    public async Task<AuctionResponse> CreateAsync(int userId, CreateAuctionRequest request)
     {
-        var seller = await _userRepository.GetByIdAsync(request.OwnerId);
+        var seller = await _userRepository.GetByIdAsync(userId);
         if (seller == null)
         {
-            throw new UserNotFoundException(request.OwnerId);
+            throw new UserNotFoundException(userId);
         }
 
         var auction = new Auction
@@ -35,7 +35,7 @@ public class AuctionService : IAuctionService
             StartDate = request.StartDate,
             EndDate = request.EndDate,
             Category = request.Category,
-            OwnerId = request.OwnerId
+            OwnerId = userId
         };
 
         await _auctionRepository.AddAsync(auction);

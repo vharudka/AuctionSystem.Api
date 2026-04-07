@@ -40,6 +40,10 @@ public class ExceptionHandlingMiddleware
                     context.Response.StatusCode = StatusCodes.Status400BadRequest;
                     break;
 
+                case InvalidCredentialsException:
+                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                    break;
+
                 default:
                     _logger.LogError(ex, "Unhandled exception");
                     context.Response.StatusCode = StatusCodes.Status500InternalServerError;

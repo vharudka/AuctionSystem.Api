@@ -3,5 +3,6 @@
 public record CreateUserRequest(
     string Username,
     string Name,
-    string Surname
+    string Surname,
+    string Password
 );

@@ -54,7 +54,8 @@ public class UserService : IUserService
         {
             Username = request.Username,
             Name = request.Name,
-            Surname = request.Surname
+            Surname = request.Surname,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password)
         };
 
         await _repository.AddAsync(user);
@@ -74,6 +75,11 @@ public class UserService : IUserService
 
         user.Name = request.Name;
         user.Surname = request.Surname;
+
+        if (!string.IsNullOrWhiteSpace(request.Password))
+        {
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
+        }
 
         await _repository.UpdateAsync(user);
         await _repository.SaveChangesAsync();

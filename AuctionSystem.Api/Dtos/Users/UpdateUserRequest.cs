@@ -2,5 +2,6 @@
 
 public record UpdateUserRequest(
     string Name,
-    string Surname
+    string Surname,
+    string? Password
 );
