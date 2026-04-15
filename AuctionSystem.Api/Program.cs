@@ -36,6 +36,18 @@ builder.Services.AddScoped<IBidService, BidService>();
 
 builder.Services.AddEndpointsApiExplorer();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowVite",
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:5173")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod()
+                  .AllowCredentials();
+        });
+});
+
 var jwt = builder.Configuration.GetSection("Jwt");
 
 builder.Services.AddAuthentication(options =>
@@ -79,6 +91,7 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseCors("AllowVite");
 
 app.MapControllers();
 
