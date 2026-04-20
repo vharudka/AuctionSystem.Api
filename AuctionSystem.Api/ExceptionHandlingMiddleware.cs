@@ -26,21 +26,25 @@ public class ExceptionHandlingMiddleware
             switch (ex)
             {
                 case UsernameAlreadyExistsException:
+                    _logger.LogWarning(ex, ex.Message);
                     context.Response.StatusCode = StatusCodes.Status409Conflict;
                     break;
 
                 case UserNotFoundException:
                 case AuctionNotFoundException:
+                    _logger.LogWarning(ex, ex.Message);
                     context.Response.StatusCode = StatusCodes.Status404NotFound;
                     break;
 
                 case BidTooLowException:
                 case AuctionNotActiveException:
                 case AuctionExpiredException:
+                    _logger.LogWarning(ex, ex.Message);
                     context.Response.StatusCode = StatusCodes.Status400BadRequest;
                     break;
 
                 case InvalidCredentialsException:
+                    _logger.LogWarning(ex, ex.Message);
                     context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                     break;
 

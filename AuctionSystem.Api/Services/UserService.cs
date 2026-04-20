@@ -39,7 +39,6 @@ public class UserService : IUserService
         }
 
         return new UserResponse(user.Id, user.Username, user.Name, user.Surname);
-
     }
 
     public async Task<UserResponse> CreateAsync(CreateUserRequest request)
