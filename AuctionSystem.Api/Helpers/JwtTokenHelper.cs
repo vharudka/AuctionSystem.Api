@@ -14,7 +14,7 @@ public static class JwtTokenHelper
 
         var claims = new[]
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new Claim("id", user.Id.ToString()),
             new Claim("username", user.Username)
         };
 
