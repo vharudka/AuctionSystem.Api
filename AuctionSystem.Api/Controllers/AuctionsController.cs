@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace AuctionSystem.Api.Controllers;
 
 [ApiController]
-[Route("auctions")]
+[Route("api/[controller]")]
 [Authorize]
 public class AuctionsController : ControllerBase
 {

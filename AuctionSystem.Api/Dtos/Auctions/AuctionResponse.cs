@@ -11,6 +11,6 @@ public record AuctionResponse(
     decimal CurrentPrice,
     DateTime StartDate,
     DateTime EndDate,
-    AuctionStatus Status,
+    string Status,
     int OwnerId
 );

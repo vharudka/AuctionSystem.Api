@@ -110,7 +110,7 @@ public class AuctionService : IAuctionService
             a.CurrentPrice,
             a.StartDate,
             a.EndDate,
-            AuctionStatusCalculator.GetStatus(a.StartDate, a.EndDate),
+            AuctionStatusCalculator.GetStatus(a.StartDate, a.EndDate).ToString(),
             a.OwnerId
         );
 }

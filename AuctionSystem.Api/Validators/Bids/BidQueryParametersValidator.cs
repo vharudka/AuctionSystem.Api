@@ -12,8 +12,8 @@ public class BidQueryParametersValidator : AbstractValidator<BidQueryParameters>
         RuleFor(x => x.SortBy)
             .Must(s => string.IsNullOrEmpty(s) ||
                        s.Equals("amount", StringComparison.OrdinalIgnoreCase) ||
-                       s.Equals("createdAt", StringComparison.OrdinalIgnoreCase) ||
+                       s.Equals("placedat", StringComparison.OrdinalIgnoreCase) ||
                        s.Equals("userId", StringComparison.OrdinalIgnoreCase))
-            .WithMessage("SortBy must be one of: amount, createdAt, userId.");
+            .WithMessage("SortBy must be one of: amount, placedat, userId.");
     }
 }
