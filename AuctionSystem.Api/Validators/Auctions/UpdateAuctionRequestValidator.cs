@@ -34,6 +34,8 @@ public class UpdateAuctionRequestValidator : AbstractValidator<UpdateAuctionRequ
 
         RuleFor(x => x.Category)
             .NotEmpty()
-            .WithMessage("Category is required.");
+            .WithMessage("Category is required.")
+            .MaximumLength(100)
+            .WithMessage("Category cannot exceed 100 characters.");
     }
 }

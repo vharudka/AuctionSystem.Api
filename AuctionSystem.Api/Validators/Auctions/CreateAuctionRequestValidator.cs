@@ -21,7 +21,9 @@ public class CreateAuctionRequestValidator : AbstractValidator<CreateAuctionRequ
 
         RuleFor(x => x.Category)
             .NotEmpty()
-            .WithMessage("Category is required.");
+            .WithMessage("Category is required.")
+            .MaximumLength(100)
+            .WithMessage("Category cannot exceed 100 characters.");
 
         RuleFor(x => x.StartingPrice)
             .GreaterThan(0)

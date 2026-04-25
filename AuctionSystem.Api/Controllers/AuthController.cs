@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace AuctionSystem.Api.Controllers;
 
 [ApiController]
-[Route("api/auth")]
+[Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _auth;
@@ -20,7 +20,7 @@ public class AuthController : ControllerBase
 
     [HttpPost("login")]
     [AllowAnonymous]
-    public async Task<IActionResult> Login(LoginRequest request)
+    public async Task<IActionResult> LoginAsync(LoginRequest request)
     {
         _logger.LogInformation("Login request received for username {Username}", request.Username);
 
