@@ -8,6 +8,6 @@ public interface IAuctionService
     Task<PagedResult<AuctionResponse>> GetAllAsync(AuctionQueryParameters query);
     Task<AuctionResponse> GetByIdAsync(int id);
     Task<AuctionResponse> CreateAsync(int userId, CreateAuctionRequest request);
-    Task<AuctionResponse> UpdateAsync(int id, UpdateAuctionRequest request);
-    Task DeleteAsync(int id);
+    Task<AuctionResponse> UpdateAsync(int id, int userId, UpdateAuctionRequest request);
+    Task DeleteAsync(int id, int userId);
 }

@@ -1,4 +1,5 @@
-﻿using AuctionSystem.Api.Dtos.Auctions;
+﻿using AuctionSystem.Api.Domain.Entities;
+using AuctionSystem.Api.Dtos.Auctions;
 using AuctionSystem.Api.Extensions;
 using AuctionSystem.Api.Services;
 using FluentValidation;
@@ -61,7 +62,9 @@ public class AuctionsController : ControllerBase
             return BadRequest(validation.Errors);
         }
 
-        var result = await _service.UpdateAsync(id, request);
+        var userId = User.GetUserId();
+
+        var result = await _service.UpdateAsync(id, userId, request);
 
         _logger.LogInformation("Auction {AuctionId} updated successfully", id);
 
@@ -73,7 +76,9 @@ public class AuctionsController : ControllerBase
     {
         _logger.LogInformation("Delete auction request received for Id {Id}", id);
 
-        await _service.DeleteAsync(id);
+        var userId = User.GetUserId();
+
+        await _service.DeleteAsync(id, userId);
 
         _logger.LogInformation("Auction with Id {Id} deleted successfully", id);
 

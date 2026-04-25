@@ -44,12 +44,17 @@ public class AuctionService : IAuctionService
         return Map(auction);
     }
 
-    public async Task<AuctionResponse> UpdateAsync(int id, UpdateAuctionRequest request)
+    public async Task<AuctionResponse> UpdateAsync(int id, int userId, UpdateAuctionRequest request)
     {
         var auction = await _auctionRepository.GetByIdAsync(id);
         if (auction == null)
         {
             throw new AuctionNotFoundException(id);
+        }
+
+        if (auction.OwnerId != userId)
+        {
+            throw new AuctionOwnershipException(id, userId);
         }
 
         auction.Title = request.Title;
@@ -65,12 +70,17 @@ public class AuctionService : IAuctionService
         return Map(auction);
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task DeleteAsync(int id, int userId)
     {
         var auction = await _auctionRepository.GetByIdAsync(id);
         if (auction == null)
         {
             throw new AuctionNotFoundException(id);
+        }
+
+        if (auction.OwnerId != userId)
+        {
+            throw new AuctionOwnershipException(id, userId);
         }
 
         await _auctionRepository.DeleteAsync(auction);

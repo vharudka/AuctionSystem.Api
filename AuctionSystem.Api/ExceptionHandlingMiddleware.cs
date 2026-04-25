@@ -26,6 +26,9 @@ public class ExceptionHandlingMiddleware
             switch (ex)
             {
                 case UsernameAlreadyExistsException:
+                case BidTooLowException:
+                case AuctionNotActiveException:
+                case AuctionExpiredException:
                     _logger.LogWarning(ex, ex.Message);
                     context.Response.StatusCode = StatusCodes.Status409Conflict;
                     break;
@@ -36,11 +39,9 @@ public class ExceptionHandlingMiddleware
                     context.Response.StatusCode = StatusCodes.Status404NotFound;
                     break;
 
-                case BidTooLowException:
-                case AuctionNotActiveException:
-                case AuctionExpiredException:
+                case AuctionOwnershipException:
                     _logger.LogWarning(ex, ex.Message);
-                    context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                    context.Response.StatusCode = StatusCodes.Status403Forbidden;
                     break;
 
                 case InvalidCredentialsException:

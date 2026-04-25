@@ -87,7 +87,26 @@ public class AuctionServiceTests
                                                DateTime.UtcNow.AddDays(1));
 
         await Assert.ThrowsExactlyAsync<AuctionNotFoundException>(async () =>
-            await _service.UpdateAsync(1, request));
+            await _service.UpdateAsync(1, 1, request));
+    }
+
+    [TestMethod]
+    public async Task UpdateAsync_UserNotOwner_ThrowsException()
+    {
+        var auction = new Auction { Id = 1, OwnerId = 2 };
+
+        _auctionRepo.Setup(r => r.GetByIdAsync(1))
+                    .ReturnsAsync(auction);
+
+        var request = new UpdateAuctionRequest("TestTitle",
+                                               "TestDescription",
+                                               "TestCategory",
+                                               10,
+                                               DateTime.UtcNow,
+                                               DateTime.UtcNow.AddDays(1));
+
+        await Assert.ThrowsExactlyAsync<AuctionOwnershipException>(async () =>
+            await _service.UpdateAsync(1, 1, request));
     }
 
     [TestMethod]
@@ -121,7 +140,7 @@ public class AuctionServiceTests
                                                DateTime.UtcNow,
                                                DateTime.UtcNow.AddDays(1));
 
-        var response = await _service.UpdateAsync(1, request);
+        var response = await _service.UpdateAsync(1, 1, request);
 
         Assert.AreEqual(request.Title, response.Title);
         Assert.AreEqual(request.Description, response.Description);
@@ -143,13 +162,25 @@ public class AuctionServiceTests
                     .ReturnsAsync((Auction?)null);
 
         await Assert.ThrowsExactlyAsync<AuctionNotFoundException>(async () =>
-            await _service.DeleteAsync(1));
+            await _service.DeleteAsync(1, 1));
+    }
+
+    [TestMethod]
+    public async Task DeleteAsync_UserNotOwner_ThrowsException()
+    {
+        var auction = new Auction { Id = 1, OwnerId = 2 };
+
+        _auctionRepo.Setup(r => r.GetByIdAsync(1))
+                    .ReturnsAsync(auction);
+
+        await Assert.ThrowsExactlyAsync<AuctionOwnershipException>(async () =>
+            await _service.DeleteAsync(1, 1));
     }
 
     [TestMethod]
     public async Task DeleteAsync_ValidId_DeletesAuction()
     {
-        var auction = new Auction { Id = 1 };
+        var auction = new Auction { Id = 1, OwnerId = 1};
 
         _auctionRepo.Setup(r => r.GetByIdAsync(1))
                     .ReturnsAsync(auction);
@@ -160,7 +191,7 @@ public class AuctionServiceTests
         _auctionRepo.Setup(r => r.SaveChangesAsync())
                     .Returns(Task.CompletedTask);
 
-        await _service.DeleteAsync(1);
+        await _service.DeleteAsync(1, 1);
 
         _auctionRepo.Verify(r => r.GetByIdAsync(1), Times.Once);
         _auctionRepo.Verify(r => r.DeleteAsync(auction), Times.Once);

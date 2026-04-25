@@ -45,7 +45,6 @@ public class BidService : IBidService
         );
     }
 
-
     public async Task<BidResponse> CreateAsync(int auctionId, int userId, CreateBidRequest request)
     {
         var auction = await _auctionRepository.GetByIdAsync(auctionId);
