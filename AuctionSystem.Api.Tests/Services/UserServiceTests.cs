@@ -142,15 +142,14 @@ public class UserServiceTests
     }
 
     [TestMethod]
-    public async Task DeleteAsync_UserNotFound_DoesNothing()
+    public async Task DeleteAsync_UserNotFound_ThrowsException()
     {
         _repoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync((User?)null);
 
-        await _service.DeleteAsync(1);
+        var request = new UpdateUserRequest("TestName", "TestSurname", null);
 
-        _repoMock.Verify(r => r.GetByIdAsync(1), Times.Once);
-        _repoMock.Verify(r => r.DeleteAsync(It.IsAny<User>()), Times.Never);
-        _repoMock.Verify(r => r.SaveChangesAsync(), Times.Never);
+        await Assert.ThrowsExactlyAsync<UserNotFoundException>(async () =>
+            await _service.UpdateAsync(1, request));
     }
 
     [TestMethod]
