@@ -33,12 +33,7 @@ public class UserService : IUserService
     {
         var user = await _repository.GetByIdAsync(id);
 
-        if (user == null)
-        {
-            throw new UserNotFoundException(id);
-        }
-
-        return new UserResponse(user.Id, user.Username, user.Name, user.Surname);
+        return user == null ? throw new UserNotFoundException(id) : new UserResponse(user.Id, user.Username, user.Name, user.Surname);
     }
 
     public async Task<UserResponse> CreateAsync(CreateUserRequest request)
@@ -65,13 +60,7 @@ public class UserService : IUserService
 
     public async Task<UserResponse?> UpdateAsync(int id, UpdateUserRequest request)
     {
-        var user = await _repository.GetByIdAsync(id);
-
-        if (user == null)
-        {
-            throw new UserNotFoundException(id);
-        }
-
+        var user = await _repository.GetByIdAsync(id) ?? throw new UserNotFoundException(id);
         user.Name = request.Name;
         user.Surname = request.Surname;
 
@@ -88,11 +77,7 @@ public class UserService : IUserService
 
     public async Task DeleteAsync(int id)
     {
-        var user = await _repository.GetByIdAsync(id);
-        if (user == null)
-        {
-            return;
-        }
+        var user = await _repository.GetByIdAsync(id) ?? throw new UserNotFoundException(id);
 
         await _repository.DeleteAsync(user);
         await _repository.SaveChangesAsync();

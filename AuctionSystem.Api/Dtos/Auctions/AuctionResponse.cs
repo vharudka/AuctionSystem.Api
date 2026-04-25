@@ -1,6 +1,4 @@
-﻿using AuctionSystem.Api.Domain.Enums;
-
-namespace AuctionSystem.Api.Dtos.Auctions;
+﻿namespace AuctionSystem.Api.Dtos.Auctions;
 
 public record AuctionResponse(
     int Id,

@@ -23,12 +23,7 @@ public class BidService : IBidService
 
     public async Task<PagedResult<BidResponse>> GetBidsAsync(int auctionId, BidQueryParameters query)
     {
-        var auction = await _auctionRepository.GetByIdAsync(auctionId);
-        if (auction == null)
-        {
-            throw new AuctionNotFoundException(auctionId);
-        }
-
+        var auction = await _auctionRepository.GetByIdAsync(auctionId) ?? throw new AuctionNotFoundException(auctionId);
         var result = await _bidRepository.GetBidsForAuctionAsync(auctionId, query);
 
         return new PagedResult<BidResponse>(
@@ -47,33 +42,22 @@ public class BidService : IBidService
 
     public async Task<BidResponse> CreateAsync(int auctionId, int userId, CreateBidRequest request)
     {
-        var auction = await _auctionRepository.GetByIdAsync(auctionId);
-        if (auction == null)
-        {
-            throw new AuctionNotFoundException(auctionId);
-        }
-
-        var user = await _userRepository.GetByIdAsync(userId);
-        if (user == null)
-        {
-            throw new UserNotFoundException(userId);
-        }
-
+        var auction = await _auctionRepository.GetByIdAsync(auctionId) ?? throw new AuctionNotFoundException(auctionId);
+        _ = await _userRepository.GetByIdAsync(userId) ?? throw new UserNotFoundException(userId);
         var status = AuctionStatusCalculator.GetStatus(auction.StartDate, auction.EndDate);
 
-        if (status == AuctionStatus.Draft)
+        switch (status)
         {
-            throw new AuctionNotActiveException();
-        }
+            case AuctionStatus.Draft:
+                throw new AuctionNotActiveException();
 
-        if (status == AuctionStatus.Finished)
-        {
-            throw new AuctionExpiredException();
-        }
+            case AuctionStatus.Finished:
+                throw new AuctionExpiredException();
 
-        if (request.Amount <= auction.CurrentPrice)
-        {
-            throw new BidTooLowException(auction.CurrentPrice);
+            case AuctionStatus.Active:
+                if (request.Amount <= auction.CurrentPrice)
+                    throw new BidTooLowException(auction.CurrentPrice);
+                break;
         }
 
         var bid = new Bid

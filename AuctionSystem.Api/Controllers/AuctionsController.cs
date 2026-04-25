@@ -1,5 +1,4 @@
-﻿using AuctionSystem.Api.Domain.Entities;
-using AuctionSystem.Api.Dtos.Auctions;
+﻿using AuctionSystem.Api.Dtos.Auctions;
 using AuctionSystem.Api.Extensions;
 using AuctionSystem.Api.Services;
 using FluentValidation;

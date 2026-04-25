@@ -18,12 +18,7 @@ public class AuthService : IAuthService
 
     public async Task<string> LoginAsync(LoginRequest request)
     {
-        var user = await _users.GetByUsernameAsync(request.Username);
-        if (user == null)
-        {
-            throw new InvalidCredentialsException();
-        }
-
+        var user = await _users.GetByUsernameAsync(request.Username) ?? throw new InvalidCredentialsException();
         if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
         {
             throw new InvalidCredentialsException();

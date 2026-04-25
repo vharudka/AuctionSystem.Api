@@ -1,5 +1,4 @@
 ﻿using AuctionSystem.Api.Domain.Entities;
-using AuctionSystem.Api.Domain.Enums;
 using AuctionSystem.Api.Domain.Exceptions;
 using AuctionSystem.Api.Dtos.Auctions;
 using AuctionSystem.Api.Helpers;
@@ -20,12 +19,7 @@ public class AuctionService : IAuctionService
 
     public async Task<AuctionResponse> CreateAsync(int userId, CreateAuctionRequest request)
     {
-        var seller = await _userRepository.GetByIdAsync(userId);
-        if (seller == null)
-        {
-            throw new UserNotFoundException(userId);
-        }
-
+        _ = await _userRepository.GetByIdAsync(userId) ?? throw new UserNotFoundException(userId);
         var auction = new Auction
         {
             Title = request.Title,
@@ -46,12 +40,7 @@ public class AuctionService : IAuctionService
 
     public async Task<AuctionResponse> UpdateAsync(int id, int userId, UpdateAuctionRequest request)
     {
-        var auction = await _auctionRepository.GetByIdAsync(id);
-        if (auction == null)
-        {
-            throw new AuctionNotFoundException(id);
-        }
-
+        var auction = await _auctionRepository.GetByIdAsync(id) ?? throw new AuctionNotFoundException(id);
         if (auction.OwnerId != userId)
         {
             throw new AuctionOwnershipException(id, userId);
@@ -72,12 +61,7 @@ public class AuctionService : IAuctionService
 
     public async Task DeleteAsync(int id, int userId)
     {
-        var auction = await _auctionRepository.GetByIdAsync(id);
-        if (auction == null)
-        {
-            throw new AuctionNotFoundException(id);
-        }
-
+        var auction = await _auctionRepository.GetByIdAsync(id) ?? throw new AuctionNotFoundException(id);
         if (auction.OwnerId != userId)
         {
             throw new AuctionOwnershipException(id, userId);
@@ -90,12 +74,7 @@ public class AuctionService : IAuctionService
     public async Task<AuctionResponse> GetByIdAsync(int id)
     {
         var auction = await _auctionRepository.GetByIdAsync(id);
-        if (auction == null)
-        {
-            throw new AuctionNotFoundException(id);
-        }
-
-        return Map(auction);
+        return auction == null ? throw new AuctionNotFoundException(id) : Map(auction);
     }
 
     public async Task<PagedResult<AuctionResponse>> GetAllAsync(AuctionQueryParameters query)
@@ -111,7 +90,8 @@ public class AuctionService : IAuctionService
     }
 
     private static AuctionResponse Map(Auction a)
-        => new AuctionResponse(
+        => new
+        (
             a.Id,
             a.Title,
             a.Description,
