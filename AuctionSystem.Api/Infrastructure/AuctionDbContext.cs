@@ -1,4 +1,5 @@
-﻿using AuctionSystem.Api.Domain.Entities;
+﻿using AuctionSystem.Api.Data;
+using AuctionSystem.Api.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuctionSystem.Api.Infrastructure;
@@ -54,5 +55,14 @@ public class AuctionDbContext : DbContext
         modelBuilder.Entity<Bid>()
                     .Property(b => b.Amount)
                     .HasPrecision(18, 2);
+
+        modelBuilder.Entity<User>()
+                    .HasData(UserSeed.GetData());
+
+        modelBuilder.Entity<Auction>()
+                    .HasData(AuctionSeed.GetData());
+
+        modelBuilder.Entity<Bid>()
+                    .HasData(BidSeed.GetData());
     }
 }
