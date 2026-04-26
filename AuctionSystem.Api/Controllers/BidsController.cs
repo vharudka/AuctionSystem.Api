@@ -28,7 +28,7 @@ public class BidsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetBidsAsync(int auctionId, [FromQuery] BidQueryParameters query)
+    public async Task<IActionResult> GetAllAsync(int auctionId, [FromQuery] BidQueryParameters query)
     {
         _logger.LogInformation("Get bids request received for auction {AuctionId}", auctionId);
 
@@ -39,7 +39,7 @@ public class BidsController : ControllerBase
             return BadRequest(validation.Errors);
         }
 
-        var result = await _service.GetBidsAsync(auctionId, query);
+        var result = await _service.GetAllAsync(auctionId, query);
 
         _logger.LogInformation("Bids for auction {AuctionId} retrieved successfully", auctionId);
 

@@ -12,7 +12,7 @@ public class BidRepository : IBidRepository
         _db = db;
     }
 
-    public async Task<PagedResult<Bid>> GetBidsForAuctionAsync(int auctionId, BidQueryParameters query)
+    public async Task<PagedResult<Bid>> GetAllByAuctionIdAsync(int auctionId, BidQueryParameters query)
     {
         var bids = _db.Bids
             .Where(b => b.AuctionId == auctionId)

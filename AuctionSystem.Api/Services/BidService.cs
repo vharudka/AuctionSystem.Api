@@ -21,10 +21,10 @@ public class BidService : IBidService
         _userRepository = userRepository;
     }
 
-    public async Task<PagedResult<BidResponse>> GetBidsAsync(int auctionId, BidQueryParameters query)
+    public async Task<PagedResult<BidResponse>> GetAllAsync(int auctionId, BidQueryParameters query)
     {
         var auction = await _auctionRepository.GetByIdAsync(auctionId) ?? throw new AuctionNotFoundException(auctionId);
-        var result = await _bidRepository.GetBidsForAuctionAsync(auctionId, query);
+        var result = await _bidRepository.GetAllByAuctionIdAsync(auctionId, query);
 
         return new PagedResult<BidResponse>(
             result.Items.Select(b => new BidResponse(

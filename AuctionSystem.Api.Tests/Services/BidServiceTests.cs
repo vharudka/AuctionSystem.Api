@@ -25,7 +25,7 @@ public class BidServiceTests
     }
 
     [TestMethod]
-    public async Task GetBidsAsync_AuctionNotFound_ThrowsException()
+    public async Task GetAllAsync_AuctionNotFound_ThrowsException()
     {
         var query = new BidQueryParameters(null,
                                            true,
@@ -36,11 +36,11 @@ public class BidServiceTests
                     .ReturnsAsync((Auction?)null);
 
         await Assert.ThrowsExactlyAsync<AuctionNotFoundException>(async () =>
-            await _service.GetBidsAsync(1, query));
+            await _service.GetAllAsync(1, query));
     }
 
     [TestMethod]
-    public async Task GetBidsAsync_ValidRequest_ReturnsPagedResult()
+    public async Task GetAllAsync_ValidRequest_ReturnsPagedResult()
     {
         var auction = new Auction { Id = 1 };
         _auctionRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(auction);
@@ -58,15 +58,15 @@ public class BidServiceTests
                                            1,
                                            10);
 
-        _bidRepo.Setup(r => r.GetBidsForAuctionAsync(1, It.IsAny<BidQueryParameters>()))
+        _bidRepo.Setup(r => r.GetAllByAuctionIdAsync(1, It.IsAny<BidQueryParameters>()))
                 .ReturnsAsync(paged);
 
-        var result = await _service.GetBidsAsync(1, query);
+        var result = await _service.GetAllAsync(1, query);
 
         Assert.AreEqual(2, result.TotalCount);
         Assert.AreEqual(2, result.Items.Count());
 
-        _bidRepo.Verify(r => r.GetBidsForAuctionAsync(1, It.IsAny<BidQueryParameters>()), Times.Once);
+        _bidRepo.Verify(r => r.GetAllByAuctionIdAsync(1, It.IsAny<BidQueryParameters>()), Times.Once);
     }
 
     [TestMethod]
