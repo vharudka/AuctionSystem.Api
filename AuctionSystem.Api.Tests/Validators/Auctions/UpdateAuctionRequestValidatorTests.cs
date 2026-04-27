@@ -22,7 +22,7 @@ public class UpdateAuctionRequestValidatorTests
     {
         var model = new UpdateAuctionRequest("",
                                              "TestDescription",
-                                             "TestCategory",
+                                             1,
                                              10,
                                              _now.AddHours(1),
                                              _now.AddHours(2));
@@ -37,7 +37,7 @@ public class UpdateAuctionRequestValidatorTests
     {
         var model = new UpdateAuctionRequest(new string('x', 101),
                                              "TestDescription",
-                                             "TestCategory",
+                                             1,
                                              10,
                                              _now.AddHours(1),
                                              _now.AddHours(2));
@@ -52,7 +52,7 @@ public class UpdateAuctionRequestValidatorTests
     {
         var model = new UpdateAuctionRequest("TestTitle",
                                              "",
-                                             "TestCategory",
+                                             1,
                                              10,
                                              _now.AddHours(1),
                                              _now.AddHours(2));
@@ -67,7 +67,7 @@ public class UpdateAuctionRequestValidatorTests
     {
         var model = new UpdateAuctionRequest("TestTitle",
                                              new string('x', 1001),
-                                             "TestCategory",
+                                             1,
                                              10,
                                              _now.AddHours(1),
                                              _now.AddHours(2));
@@ -78,41 +78,11 @@ public class UpdateAuctionRequestValidatorTests
     }
 
     [TestMethod]
-    public void Category_Empty_ShouldHaveError()
-    {
-        var model = new UpdateAuctionRequest("TestTitle",
-                                             "TestDescription",
-                                             "",
-                                             10,
-                                             _now.AddHours(1),
-                                             _now.AddHours(2));
-
-        var result = _validator.TestValidate(model);
-
-        result.ShouldHaveValidationErrorFor(x => x.Category);
-    }
-
-    [TestMethod]
-    public void Category_TooLong_ShouldHaveError()
-    {
-        var model = new UpdateAuctionRequest("TestTitle",
-                                             "TestDescription",
-                                             new string('x', 101),
-                                             10,
-                                             _now.AddHours(1),
-                                             _now.AddHours(2));
-
-        var result = _validator.TestValidate(model);
-
-        result.ShouldHaveValidationErrorFor(x => x.Category);
-    }
-
-    [TestMethod]
     public void StartingPrice_TooSmall_ShouldHaveError()
     {
         var model = new UpdateAuctionRequest("TestTitle",
                                              "TestDescription",
-                                             "TestCategory",
+                                             1,
                                              0,
                                              _now.AddHours(1),
                                              _now.AddHours(2));
@@ -127,7 +97,7 @@ public class UpdateAuctionRequestValidatorTests
     {
         var model = new UpdateAuctionRequest("TestTitle",
                                              "TestDescription",
-                                             "TestCategory",
+                                             1,
                                              10,
                                              _now.AddHours(-1),
                                              _now.AddHours(2));
@@ -142,7 +112,7 @@ public class UpdateAuctionRequestValidatorTests
     {
         var model = new UpdateAuctionRequest("TestTitle",
                                              "TestDescription",
-                                             "TestCategory",
+                                             1,
                                              10,
                                              _now.AddHours(2),
                                              _now.AddHours(1));
@@ -157,7 +127,7 @@ public class UpdateAuctionRequestValidatorTests
     {
         var model = new UpdateAuctionRequest("TestTitle",
                                              "TestDescription",
-                                             "TestCategory",
+                                             1,
                                              10,
                                              _now.AddHours(1),
                                              _now.AddHours(1));
@@ -172,7 +142,7 @@ public class UpdateAuctionRequestValidatorTests
     {
         var model = new UpdateAuctionRequest("TestTitle",
                                              "TestDescription",
-                                             "TestCategory",
+                                             1,
                                              10,
                                              _now.AddHours(1),
                                              _now.AddHours(2));

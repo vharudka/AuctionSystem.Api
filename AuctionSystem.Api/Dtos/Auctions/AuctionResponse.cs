@@ -5,6 +5,7 @@ public record AuctionResponse(
     string Title,
     string Description,
     string Category,
+    int CategoryId,
     decimal StartingPrice,
     decimal CurrentPrice,
     DateTime StartDate,

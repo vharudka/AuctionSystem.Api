@@ -14,6 +14,7 @@ public class AuctionDbContext : DbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<Auction> Auctions => Set<Auction>();
     public DbSet<Bid> Bids => Set<Bid>();
+    public DbSet<Category> Categories => Set<Category>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -40,6 +41,13 @@ public class AuctionDbContext : DbContext
                     .HasForeignKey(b => b.AuctionId)
                     .OnDelete(DeleteBehavior.Cascade);
 
+        // Auction to Categories (one-to-many)
+        modelBuilder.Entity<Auction>()
+                    .HasOne(a => a.Category)
+                    .WithMany(c => c.Auctions)
+                    .HasForeignKey(a => a.CategoryId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
         modelBuilder.Entity<User>()
                     .HasIndex(u => u.Username)
                     .IsUnique();
@@ -55,6 +63,9 @@ public class AuctionDbContext : DbContext
         modelBuilder.Entity<Bid>()
                     .Property(b => b.Amount)
                     .HasPrecision(18, 2);
+
+        modelBuilder.Entity<Category>()
+                    .HasData(CategorySeed.GetData());
 
         modelBuilder.Entity<User>()
                     .HasData(UserSeed.GetData());

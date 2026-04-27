@@ -15,16 +15,18 @@ public class AuctionRepository : IAuctionRepository
 
     public Task<Auction?> GetByIdAsync(int id)
     {
-        return _db.Auctions.FindAsync(id).AsTask();
+        return _db.Auctions.Include(a => a.Category)
+                           .FirstOrDefaultAsync(a => a.Id == id);
     }
 
     public async Task<PagedResult<Auction>> GetAllAsync(AuctionQueryParameters query)
     {
-        var auctions = _db.Auctions.AsQueryable();
+        var auctions = _db.Auctions.Include(a => a.Category)
+                                   .AsQueryable();
 
-        if (!string.IsNullOrWhiteSpace(query.Category))
+        if (query.CategoryId.HasValue)
         {
-            auctions = auctions.Where(a => a.Category == query.Category);
+            auctions = auctions.Where(a => a.CategoryId == query.CategoryId.Value);
         }
 
         var now = DateTime.UtcNow;

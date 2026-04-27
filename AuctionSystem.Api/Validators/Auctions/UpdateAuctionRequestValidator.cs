@@ -31,11 +31,5 @@ public class UpdateAuctionRequestValidator : AbstractValidator<UpdateAuctionRequ
         RuleFor(x => x.EndDate)
             .GreaterThan(x => x.StartDate)
             .WithMessage("End date must be later than start date.");
-
-        RuleFor(x => x.Category)
-            .NotEmpty()
-            .WithMessage("Category is required.")
-            .MaximumLength(100)
-            .WithMessage("Category cannot exceed 100 characters.");
     }
 }

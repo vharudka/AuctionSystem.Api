@@ -12,6 +12,7 @@ public class AuctionServiceTests
 {
     private Mock<IAuctionRepository> _auctionRepo = null!;
     private Mock<IUserRepository> _userRepo = null!;
+    private Mock<ICategoryRepository> _categoryRepo = null!;
     private AuctionService _service = null!;
 
     [TestInitialize]
@@ -19,7 +20,8 @@ public class AuctionServiceTests
     {
         _auctionRepo = new Mock<IAuctionRepository>();
         _userRepo = new Mock<IUserRepository>();
-        _service = new AuctionService(_auctionRepo.Object, _userRepo.Object);
+        _categoryRepo = new Mock<ICategoryRepository>();
+        _service = new AuctionService(_auctionRepo.Object, _userRepo.Object, _categoryRepo.Object);
     }
 
     [TestMethod]
@@ -33,17 +35,42 @@ public class AuctionServiceTests
                                                10,
                                                DateTime.UtcNow,
                                                DateTime.UtcNow.AddDays(1),
-                                               "TestCategory");
+                                               1);
 
         await Assert.ThrowsExactlyAsync<UserNotFoundException>(async () =>
             await _service.CreateAsync(1, request));
     }
 
     [TestMethod]
-    public async Task CreateAsync_ValidRequest_CreatesAuction()
+    public async Task CreateAsync_CategoryNotFound_ThrowsException()
     {
         _userRepo.Setup(r => r.GetByIdAsync(1))
+                 .ReturnsAsync(new User());
+
+        _categoryRepo.Setup(r => r.GetByIdAsync(1))
+                     .ReturnsAsync((Category?)null);
+
+        var request = new CreateAuctionRequest("TestTitle",
+                                               "TestDescription",
+                                               10,
+                                               DateTime.UtcNow,
+                                               DateTime.UtcNow.AddDays(1),
+                                               1);
+
+        await Assert.ThrowsExactlyAsync<CategoryNotFoundException>(async () =>
+            await _service.CreateAsync(1, request));
+    }
+
+    [TestMethod]
+    public async Task CreateAsync_ValidRequest_CreatesAuction()
+    {
+        var category = new Category { Id = 1, Name = "TestCategory" };
+
+        _userRepo.Setup(r => r.GetByIdAsync(1))
                  .ReturnsAsync(new User { Id = 1 });
+
+        _categoryRepo.Setup(r => r.GetByIdAsync(1))
+                     .ReturnsAsync(category);
 
         _auctionRepo.Setup(r => r.AddAsync(It.IsAny<Auction>()))
                     .Returns(Task.CompletedTask);
@@ -56,7 +83,7 @@ public class AuctionServiceTests
                                                10,
                                                DateTime.UtcNow,
                                                DateTime.UtcNow.AddDays(1),
-                                               "TestCategory");
+                                               1);
 
         var response = await _service.CreateAsync(1, request);
 
@@ -65,10 +92,11 @@ public class AuctionServiceTests
         Assert.AreEqual(request.StartingPrice, response.StartingPrice);
         Assert.AreEqual(request.StartDate, response.StartDate);
         Assert.AreEqual(request.EndDate, response.EndDate);
-        Assert.AreEqual(request.Category, response.Category);
+        Assert.AreEqual(category.Name, response.Category);
         Assert.AreEqual(1, response.OwnerId);
 
         _userRepo.Verify(r => r.GetByIdAsync(1), Times.Once);
+        _categoryRepo.Verify(r => r.GetByIdAsync(1), Times.Once);
         _auctionRepo.Verify(r => r.AddAsync(It.IsAny<Auction>()), Times.Once);
         _auctionRepo.Verify(r => r.SaveChangesAsync(), Times.Once);
     }
@@ -81,12 +109,55 @@ public class AuctionServiceTests
 
         var request = new UpdateAuctionRequest("TestTitle",
                                                "TestDescription",
-                                               "TestCategory",
+                                               1,
                                                10,
                                                DateTime.UtcNow,
                                                DateTime.UtcNow.AddDays(1));
 
         await Assert.ThrowsExactlyAsync<AuctionNotFoundException>(async () =>
+            await _service.UpdateAsync(1, 1, request));
+    }
+
+    [TestMethod]
+    public async Task UpdateAsync_UserNotFound_ThrowsException()
+    {
+        _auctionRepo.Setup(r => r.GetByIdAsync(1))
+                    .ReturnsAsync(new Auction());
+
+        _userRepo.Setup(r => r.GetByIdAsync(1))
+                 .ReturnsAsync((User?)null);
+
+        var request = new UpdateAuctionRequest("TestTitle",
+                                               "TestDescription",
+                                               1,
+                                               10,
+                                               DateTime.UtcNow,
+                                               DateTime.UtcNow.AddDays(1));
+
+        await Assert.ThrowsExactlyAsync<UserNotFoundException>(async () =>
+            await _service.UpdateAsync(1, 1, request));
+    }
+
+    [TestMethod]
+    public async Task UpdateAsync_CategoryNotFound_ThrowsException()
+    {
+        _auctionRepo.Setup(r => r.GetByIdAsync(1))
+                    .ReturnsAsync(new Auction());
+
+        _userRepo.Setup(r => r.GetByIdAsync(1))
+                 .ReturnsAsync(new User());
+
+        _categoryRepo.Setup(r => r.GetByIdAsync(1))
+                     .ReturnsAsync((Category?)null);
+
+        var request = new UpdateAuctionRequest("TestTitle",
+                                               "TestDescription",
+                                               1,
+                                               10,
+                                               DateTime.UtcNow,
+                                               DateTime.UtcNow.AddDays(1));
+
+        await Assert.ThrowsExactlyAsync<CategoryNotFoundException>(async () =>
             await _service.UpdateAsync(1, 1, request));
     }
 
@@ -98,14 +169,51 @@ public class AuctionServiceTests
         _auctionRepo.Setup(r => r.GetByIdAsync(1))
                     .ReturnsAsync(auction);
 
+        _userRepo.Setup(r => r.GetByIdAsync(1))
+                 .ReturnsAsync(new User());
+
+        _categoryRepo.Setup(r => r.GetByIdAsync(1))
+                     .ReturnsAsync(new Category());
+
         var request = new UpdateAuctionRequest("TestTitle",
                                                "TestDescription",
-                                               "TestCategory",
+                                               1,
                                                10,
                                                DateTime.UtcNow,
                                                DateTime.UtcNow.AddDays(1));
 
         await Assert.ThrowsExactlyAsync<AuctionOwnershipException>(async () =>
+            await _service.UpdateAsync(1, 1, request));
+    }
+
+    [TestMethod]
+    public async Task UpdateAsync_AuctionNotDraft_ThrowsException()
+    {
+        var auction = new Auction
+        {
+            Id = 1,
+            OwnerId = 1,
+            StartDate = DateTime.UtcNow,
+            EndDate = DateTime.UtcNow.AddDays(2)
+        };
+
+        _auctionRepo.Setup(r => r.GetByIdAsync(1))
+                    .ReturnsAsync(auction);
+
+        _userRepo.Setup(r => r.GetByIdAsync(1))
+                 .ReturnsAsync(new User());
+
+        _categoryRepo.Setup(r => r.GetByIdAsync(1))
+                     .ReturnsAsync(new Category());
+
+        var request = new UpdateAuctionRequest("TestTitle",
+                                               "TestDescription",
+                                               1,
+                                               10,
+                                               DateTime.UtcNow,
+                                               DateTime.UtcNow.AddDays(1));
+
+        await Assert.ThrowsExactlyAsync<AuctionNotDraftException>(async () =>
             await _service.UpdateAsync(1, 1, request));
     }
 
@@ -117,15 +225,23 @@ public class AuctionServiceTests
             Id = 1,
             Title = "TestOldTitle",
             Description = "TestOldDescription",
-            Category = "TestCategory",
+            CategoryId = 1,
             StartingPrice = 10,
-            StartDate = DateTime.UtcNow,
-            EndDate = DateTime.UtcNow.AddDays(1),
+            StartDate = DateTime.UtcNow.AddDays(1),
+            EndDate = DateTime.UtcNow.AddDays(2),
             OwnerId = 1
         };
 
+        var category = new Category { Id = 2, Name = "TestCategory" };
+
         _auctionRepo.Setup(r => r.GetByIdAsync(1))
                     .ReturnsAsync(auction);
+
+        _userRepo.Setup(r => r.GetByIdAsync(1))
+                 .ReturnsAsync(new User());
+
+        _categoryRepo.Setup(r => r.GetByIdAsync(2))
+                     .ReturnsAsync(category);
 
         _auctionRepo.Setup(r => r.UpdateAsync(auction))
                     .Returns(Task.CompletedTask);
@@ -135,7 +251,7 @@ public class AuctionServiceTests
 
         var request = new UpdateAuctionRequest("TestNewTitle",
                                                "TestNewDescription",
-                                               "TestNewCategory",
+                                               2,
                                                10,
                                                DateTime.UtcNow,
                                                DateTime.UtcNow.AddDays(1));
@@ -144,13 +260,15 @@ public class AuctionServiceTests
 
         Assert.AreEqual(request.Title, response.Title);
         Assert.AreEqual(request.Description, response.Description);
-        Assert.AreEqual(request.Category, response.Category);
+        Assert.AreEqual(category.Name, response.Category);
         Assert.AreEqual(auction.StartingPrice, response.StartingPrice);
         Assert.AreEqual(request.StartDate, response.StartDate);
         Assert.AreEqual(request.EndDate, response.EndDate);
         Assert.AreEqual(auction.OwnerId, response.OwnerId);
 
         _auctionRepo.Verify(r => r.GetByIdAsync(1), Times.Once);
+        _userRepo.Verify(r => r.GetByIdAsync(1), Times.Once);
+        _categoryRepo.Verify(r => r.GetByIdAsync(2), Times.Once);
         _auctionRepo.Verify(r => r.UpdateAsync(auction), Times.Once);
         _auctionRepo.Verify(r => r.SaveChangesAsync(), Times.Once);
     }
@@ -166,6 +284,19 @@ public class AuctionServiceTests
     }
 
     [TestMethod]
+    public async Task DeleteAsync_UserNotFound_ThrowsException()
+    {
+        _auctionRepo.Setup(r => r.GetByIdAsync(1))
+                    .ReturnsAsync(new Auction());
+
+        _userRepo.Setup(r => r.GetByIdAsync(1))
+                 .ReturnsAsync((User?)null);
+
+        await Assert.ThrowsExactlyAsync<UserNotFoundException>(async () =>
+            await _service.DeleteAsync(1, 1));
+    }
+
+    [TestMethod]
     public async Task DeleteAsync_UserNotOwner_ThrowsException()
     {
         var auction = new Auction { Id = 1, OwnerId = 2 };
@@ -173,17 +304,54 @@ public class AuctionServiceTests
         _auctionRepo.Setup(r => r.GetByIdAsync(1))
                     .ReturnsAsync(auction);
 
+        _userRepo.Setup(r => r.GetByIdAsync(1))
+                 .ReturnsAsync(new User());
+
         await Assert.ThrowsExactlyAsync<AuctionOwnershipException>(async () =>
+            await _service.DeleteAsync(1, 1));
+    }
+
+    [TestMethod]
+    public async Task DeleteAsync_AuctionNotDraft_ThrowsException()
+    {
+        var auction = new Auction
+        {
+            Id = 1,
+            OwnerId = 1,
+            StartDate = DateTime.UtcNow,
+            EndDate = DateTime.UtcNow.AddDays(2)
+        };
+
+        _auctionRepo.Setup(r => r.GetByIdAsync(1))
+                    .ReturnsAsync(auction);
+
+        _userRepo.Setup(r => r.GetByIdAsync(1))
+                 .ReturnsAsync(new User());
+
+        await Assert.ThrowsExactlyAsync<AuctionNotDraftException>(async () =>
             await _service.DeleteAsync(1, 1));
     }
 
     [TestMethod]
     public async Task DeleteAsync_ValidId_DeletesAuction()
     {
-        var auction = new Auction { Id = 1, OwnerId = 1};
+        var auction = new Auction
+        {
+            Id = 1,
+            Title = "TestOldTitle",
+            Description = "TestOldDescription",
+            CategoryId = 1,
+            StartingPrice = 10,
+            StartDate = DateTime.UtcNow.AddDays(1),
+            EndDate = DateTime.UtcNow.AddDays(2),
+            OwnerId = 1
+        };
 
         _auctionRepo.Setup(r => r.GetByIdAsync(1))
                     .ReturnsAsync(auction);
+
+        _userRepo.Setup(r => r.GetByIdAsync(1))
+                 .ReturnsAsync(new User());
 
         _auctionRepo.Setup(r => r.DeleteAsync(auction))
                     .Returns(Task.CompletedTask);
@@ -194,6 +362,7 @@ public class AuctionServiceTests
         await _service.DeleteAsync(1, 1);
 
         _auctionRepo.Verify(r => r.GetByIdAsync(1), Times.Once);
+        _userRepo.Verify(r => r.GetByIdAsync(1), Times.Once);
         _auctionRepo.Verify(r => r.DeleteAsync(auction), Times.Once);
         _auctionRepo.Verify(r => r.SaveChangesAsync(), Times.Once);
     }
@@ -216,7 +385,7 @@ public class AuctionServiceTests
             Id = 1,
             Title = "TestOldTitle",
             Description = "TestOldDescription",
-            Category = "TestCategory",
+            CategoryId = 1,
             StartingPrice = 10,
             StartDate = DateTime.UtcNow,
             EndDate = DateTime.UtcNow.AddDays(1),
@@ -230,7 +399,6 @@ public class AuctionServiceTests
 
         Assert.AreEqual(auction.Title, response.Title);
         Assert.AreEqual(auction.Description, response.Description);
-        Assert.AreEqual(auction.Category, response.Category);
         Assert.AreEqual(auction.StartingPrice, response.StartingPrice);
         Assert.AreEqual(auction.StartDate, response.StartDate);
         Assert.AreEqual(auction.EndDate, response.EndDate);
@@ -244,8 +412,8 @@ public class AuctionServiceTests
     {
         var auctions = new List<Auction>
         {
-            new() { Id = 1, Title = "A", Category = "TestACategory" },
-            new() { Id = 2, Title = "B", Category = "TestACategory" }
+            new() { Id = 1, Title = "A", CategoryId = 1 },
+            new() { Id = 2, Title = "B", CategoryId = 1 }
         };
 
         var paged = new PagedResult<Auction>(auctions, 1, 10, 2);
@@ -253,7 +421,7 @@ public class AuctionServiceTests
         _auctionRepo.Setup(r => r.GetAllAsync(It.IsAny<AuctionQueryParameters>()))
                     .ReturnsAsync(paged);
 
-        var query = new AuctionQueryParameters("TestACategory",
+        var query = new AuctionQueryParameters(1,
                                                null,
                                                null,
                                                "Title",

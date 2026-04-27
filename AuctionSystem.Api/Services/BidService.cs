@@ -52,7 +52,7 @@ public class BidService : IBidService
                 throw new AuctionNotActiveException();
 
             case AuctionStatus.Finished:
-                throw new AuctionExpiredException();
+                throw new AuctionFinishedException();
 
             case AuctionStatus.Active:
                 if (request.Amount <= auction.CurrentPrice)

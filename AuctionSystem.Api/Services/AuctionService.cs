@@ -1,4 +1,5 @@
 ﻿using AuctionSystem.Api.Domain.Entities;
+using AuctionSystem.Api.Domain.Enums;
 using AuctionSystem.Api.Domain.Exceptions;
 using AuctionSystem.Api.Dtos.Auctions;
 using AuctionSystem.Api.Helpers;
@@ -10,16 +11,20 @@ public class AuctionService : IAuctionService
 {
     private readonly IAuctionRepository _auctionRepository;
     private readonly IUserRepository _userRepository;
+    private readonly ICategoryRepository _categoryRepository;
 
-    public AuctionService(IAuctionRepository auctionRepository, IUserRepository userRepository)
+    public AuctionService(IAuctionRepository auctionRepository, IUserRepository userRepository, ICategoryRepository categoryRepository)
     {
         _auctionRepository = auctionRepository;
         _userRepository = userRepository;
+        _categoryRepository = categoryRepository;
     }
 
     public async Task<AuctionResponse> CreateAsync(int userId, CreateAuctionRequest request)
     {
         _ = await _userRepository.GetByIdAsync(userId) ?? throw new UserNotFoundException(userId);
+        var category = await _categoryRepository.GetByIdAsync(request.CategoryId) ?? throw new CategoryNotFoundException(request.CategoryId);
+
         var auction = new Auction
         {
             Title = request.Title,
@@ -28,7 +33,7 @@ public class AuctionService : IAuctionService
             CurrentPrice = request.StartingPrice,
             StartDate = request.StartDate,
             EndDate = request.EndDate,
-            Category = request.Category,
+            Category = category,
             OwnerId = userId
         };
 
@@ -41,17 +46,28 @@ public class AuctionService : IAuctionService
     public async Task<AuctionResponse> UpdateAsync(int id, int userId, UpdateAuctionRequest request)
     {
         var auction = await _auctionRepository.GetByIdAsync(id) ?? throw new AuctionNotFoundException(id);
+        _ = await _userRepository.GetByIdAsync(userId) ?? throw new UserNotFoundException(userId);
+        var category = await _categoryRepository.GetByIdAsync(request.CategoryId) ?? throw new CategoryNotFoundException(request.CategoryId);
+
         if (auction.OwnerId != userId)
         {
             throw new AuctionOwnershipException(id, userId);
         }
 
+        var status = AuctionStatusCalculator.GetStatus(auction.StartDate, auction.EndDate);
+        if (status != AuctionStatus.Draft)
+        {
+            throw new AuctionNotDraftException();
+        }
+
         auction.Title = request.Title;
         auction.Description = request.Description;
-        auction.Category = request.Category;
+        auction.CategoryId = request.CategoryId;
         auction.StartingPrice = request.StartingPrice;
+        auction.CurrentPrice = request.StartingPrice;
         auction.StartDate = request.StartDate;
         auction.EndDate = request.EndDate;
+        auction.Category = category;
 
         await _auctionRepository.UpdateAsync(auction);
         await _auctionRepository.SaveChangesAsync();
@@ -62,9 +78,16 @@ public class AuctionService : IAuctionService
     public async Task DeleteAsync(int id, int userId)
     {
         var auction = await _auctionRepository.GetByIdAsync(id) ?? throw new AuctionNotFoundException(id);
+        _ = await _userRepository.GetByIdAsync(userId) ?? throw new UserNotFoundException(userId);
         if (auction.OwnerId != userId)
         {
             throw new AuctionOwnershipException(id, userId);
+        }
+
+        var status = AuctionStatusCalculator.GetStatus(auction.StartDate, auction.EndDate);
+        if (status != AuctionStatus.Draft)
+        {
+            throw new AuctionNotDraftException();
         }
 
         await _auctionRepository.DeleteAsync(auction);
@@ -95,7 +118,8 @@ public class AuctionService : IAuctionService
             a.Id,
             a.Title,
             a.Description,
-            a.Category,
+            a.Category?.Name ?? "",
+            a.Category?.Id ?? -1,
             a.StartingPrice,
             a.CurrentPrice,
             a.StartDate,

@@ -120,7 +120,7 @@ public class BidServiceTests
         _auctionRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(auction);
         _userRepo.Setup(r => r.GetByIdAsync(5)).ReturnsAsync(new User());
 
-        await Assert.ThrowsExactlyAsync<AuctionExpiredException>(async () =>
+        await Assert.ThrowsExactlyAsync<AuctionFinishedException>(async () =>
             await _service.CreateAsync(1, 5, new CreateBidRequest(100)));
     }
 

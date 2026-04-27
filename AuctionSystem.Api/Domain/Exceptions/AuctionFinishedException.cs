@@ -1,7 +1,7 @@
 ﻿namespace AuctionSystem.Api.Domain.Exceptions;
 
-public class AuctionExpiredException : Exception
+public class AuctionFinishedException : Exception
 {
-    public AuctionExpiredException()
+    public AuctionFinishedException()
         : base("You cannot bid on an auction that has already finished.") { }
 }

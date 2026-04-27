@@ -28,13 +28,15 @@ public class ExceptionHandlingMiddleware
                 case UsernameAlreadyExistsException:
                 case BidTooLowException:
                 case AuctionNotActiveException:
-                case AuctionExpiredException:
+                case AuctionFinishedException:
+                case AuctionNotDraftException:
                     _logger.LogWarning(ex, ex.Message);
                     context.Response.StatusCode = StatusCodes.Status409Conflict;
                     break;
 
                 case UserNotFoundException:
                 case AuctionNotFoundException:
+                case CategoryNotFoundException:
                     _logger.LogWarning(ex, ex.Message);
                     context.Response.StatusCode = StatusCodes.Status404NotFound;
                     break;

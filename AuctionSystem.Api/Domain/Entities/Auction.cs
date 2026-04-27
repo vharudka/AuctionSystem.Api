@@ -5,11 +5,13 @@ public class Auction : Base
 {
     public string Title { get; set; }
     public string Description { get; set; }
-    public string Category { get; set; }
     public decimal StartingPrice { get; set; }
     public decimal CurrentPrice { get; set; }
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
+
+    public int CategoryId { get; set; }
+    public Category Category { get; set; }
 
     public int OwnerId { get; set; }
     public User Owner { get; set; }

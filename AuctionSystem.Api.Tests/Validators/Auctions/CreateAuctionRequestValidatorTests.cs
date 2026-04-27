@@ -25,7 +25,7 @@ public class CreateAuctionRequestValidatorTests
                                              10,
                                              _now.AddHours(1),
                                              _now.AddHours(2),
-                                             "TestCategory");
+                                             1);
 
         var result = _validator.TestValidate(model);
 
@@ -40,7 +40,7 @@ public class CreateAuctionRequestValidatorTests
                                              10,
                                              _now.AddHours(1),
                                              _now.AddHours(2),
-                                             "TestCategory");
+                                             1);
 
         var result = _validator.TestValidate(model);
 
@@ -55,7 +55,7 @@ public class CreateAuctionRequestValidatorTests
                                              10,
                                              _now.AddHours(1),
                                              _now.AddHours(2),
-                                             "TestCategory");
+                                             1);
 
         var result = _validator.TestValidate(model);
 
@@ -70,41 +70,11 @@ public class CreateAuctionRequestValidatorTests
                                              10,
                                              _now.AddHours(1),
                                              _now.AddHours(2),
-                                             "TestCategory");
+                                             1);
 
         var result = _validator.TestValidate(model);
 
         result.ShouldHaveValidationErrorFor(x => x.Description);
-    }
-
-    [TestMethod]
-    public void Category_Empty_ShouldHaveError()
-    {
-        var model = new CreateAuctionRequest("TestTitle",
-                                             "TestDescription",
-                                             10,
-                                             _now.AddHours(1),
-                                             _now.AddHours(2),
-                                             "");
-
-        var result = _validator.TestValidate(model);
-
-        result.ShouldHaveValidationErrorFor(x => x.Category);
-    }
-
-    [TestMethod]
-    public void Category_TooLong_ShouldHaveError()
-    {
-        var model = new CreateAuctionRequest("TestTitle",
-                                             "TestDescription",
-                                             10,
-                                             _now.AddHours(1),
-                                             _now.AddHours(2),
-                                             new string('x', 101));
-
-        var result = _validator.TestValidate(model);
-
-        result.ShouldHaveValidationErrorFor(x => x.Category);
     }
 
     [TestMethod]
@@ -115,7 +85,7 @@ public class CreateAuctionRequestValidatorTests
                                              0,
                                              _now.AddHours(1),
                                              _now.AddHours(2),
-                                             "TestCategory");
+                                             1);
 
         var result = _validator.TestValidate(model);
 
@@ -130,7 +100,7 @@ public class CreateAuctionRequestValidatorTests
                                              10,
                                              _now.AddHours(-1),
                                              _now.AddHours(2),
-                                             "TestCategory");
+                                             1);
 
         var result = _validator.TestValidate(model);
 
@@ -145,7 +115,7 @@ public class CreateAuctionRequestValidatorTests
                                              10,
                                              _now.AddHours(2),
                                              _now.AddHours(1),
-                                             "TestCategory");
+                                             1);
 
         var result = _validator.TestValidate(model);
 
@@ -160,7 +130,7 @@ public class CreateAuctionRequestValidatorTests
                                              10,
                                              _now.AddHours(1),
                                              _now.AddHours(1),
-                                             "TestCategory");
+                                             1);
 
         var result = _validator.TestValidate(model);
 
@@ -175,7 +145,7 @@ public class CreateAuctionRequestValidatorTests
                                              10,
                                              _now.AddHours(1),
                                              _now.AddHours(2),
-                                             "TestCategory");
+                                             1);
 
         var result = _validator.TestValidate(model);
 

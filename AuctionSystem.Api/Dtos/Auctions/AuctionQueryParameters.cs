@@ -3,7 +3,7 @@
 namespace AuctionSystem.Api.Dtos.Auctions;
 
 public record AuctionQueryParameters(
-    string? Category,
+    int? CategoryId,
     AuctionStatus? Status,
     string? Search,
     string? SortBy,

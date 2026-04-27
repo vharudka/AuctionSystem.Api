@@ -3,7 +3,7 @@
 public record UpdateAuctionRequest(
     string Title,
     string Description,
-    string Category,
+    int CategoryId,
     decimal StartingPrice,
     DateTime StartDate,
     DateTime EndDate
